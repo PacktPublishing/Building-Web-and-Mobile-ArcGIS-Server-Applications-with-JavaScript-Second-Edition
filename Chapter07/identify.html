@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>Identify</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+        var map;
+        var identifyTask, identifyParams;
+        require([
+            "esri/map", "esri/dijit/Popup",
+            "esri/layers/ArcGISDynamicMapServiceLayer",
+            "esri/tasks/IdentifyTask",
+            "esri/tasks/IdentifyResult",
+            "esri/tasks/IdentifyParameters",
+            "esri/dijit/InfoWindow",
+            "esri/symbols/SimpleFillSymbol",
+            "esri/symbols/SimpleLineSymbol",
+            "esri/InfoTemplate", "esri/Color",
+            "dojo/on", "dojo/domReady!"
+        ], function (Map, Popup, ArcGISDynamicMapServiceLayer,
+            IdentifyTask, IdentifyResult, IdentifyParameters, InfoWindow,
+            SimpleFillSymbol, SimpleLineSymbol, InfoTemplate, Color, on) {
+                //setup the popup window 
+                var popup = new Popup({
+                    fillSymbol: new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                            new Color([255, 0, 0]), 2),
+                        new Color([255, 255, 0, 0.25]))
+                }, dojo.create("div"));
+
+                // create the map
+                map = new Map("map", {
+                    basemap: "streets",
+                    center: [-83.275, 42.573],
+                    zoom: 18,
+                    infoWindow: popup
+                });
+
+                var landBaseLayer = new ArcGISDynamicMapServiceLayer("http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/BloomfieldHillsMichigan/Parcels/MapServer", { opacity: .55 });
+                map.addLayer(landBaseLayer);
+
+                map.on("click", executeIdentifyTask);
+
+                identifyTask = new IdentifyTask("http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/BloomfieldHillsMichigan/Parcels/MapServer");
+                identifyParams = new IdentifyParameters();
+                identifyParams.tolerance = 3;
+                identifyParams.returnGeometry = true;
+                identifyParams.layerIds = [0, 2];
+                identifyParams.layerOption = IdentifyParameters.LAYER_OPTION_ALL;
+                identifyParams.width = map.width;
+                identifyParams.height = map.height;
+
+            });
+
+        function executeIdentifyTask(evt) {
+            identifyParams.geometry = evt.mapPoint;
+            identifyParams.mapExtent = map.extent;
+
+            var deferred = identifyTask.execute(identifyParams);
+
+            deferred.addCallback(function (response) {
+                // response is an array of identify result objects    
+                // Let's return an array of features.
+                return dojo.map(response, function (result) {
+                    var feature = result.feature;
+                    feature.attributes.layerName = result.layerName;
+                    if (result.layerName === 'Tax Parcels') {
+                        var template = new esri.InfoTemplate("", "${Postal Address} <br/> Owner of record: ${First Owner Name}");
+                        feature.setInfoTemplate(template);
+                    }
+                    else if (result.layerName === 'Building Footprints') {
+                        var template = new InfoTemplate("", "Parcel ID: ${PARCELID}");
+                        feature.setInfoTemplate(template);
+                    }
+                    return feature;
+                });
+            });
+
+            map.infoWindow.setFeatures([deferred]);
+            map.infoWindow.show(evt.mapPoint);
+        }
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+</html>

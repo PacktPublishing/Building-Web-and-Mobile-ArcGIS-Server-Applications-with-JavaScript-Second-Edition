@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Map</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
+    <script src="https://js.arcgis.com/3.21compact/"></script>
+    <script>
+        require([
+            "esri/map",
+            "dojox/mobile",
+            "dojo/domReady!"
+        ],
+
+            function (Map, mobile) {
+
+                mobile.hideAddressBar();
+
+                var map = new esri.Map("map", {
+                    basemap: "streets",
+                    center: [-115.570, 51.178],
+                    zoom: 12,
+                    slider: false
+                });
+
+                function orientationChanged() {
+                    if (map) {
+                        map.reposition();
+                        map.resize();
+                    }
+                }
+
+            });
+    </script>
+</head>
+
+<body onorientationchange="orientationChanged()">
+    <div id="map"></div>
+</body>
+
+</html>

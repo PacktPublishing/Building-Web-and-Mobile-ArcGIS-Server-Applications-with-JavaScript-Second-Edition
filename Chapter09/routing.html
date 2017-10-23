@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>Routing</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+        require([
+            "esri/map",
+            "esri/urlUtils",
+            "esri/tasks/RouteParameters",
+            "esri/tasks/RouteTask",
+            "esri/tasks/FeatureSet",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/symbols/SimpleLineSymbol",
+            "esri/graphic",
+            "dojo/_base/Color"
+        ],
+            function (Map, urlUtils,
+                RouteParameters, RouteTask,
+                FeatureSet, SimpleMarkerSymbol,
+                SimpleLineSymbol, Graphic, Color) {
+
+                urlUtils.addProxyRule({
+                    urlPrefix: "route.arcgis.com",
+                    proxyUrl: "/sproxy/"
+                });
+
+                var map, routeTask, routeParams;
+                var stopSymbol, routeSymbol, lastStop;
+
+                map = new Map("map", {
+                    basemap: "streets",
+                    center: [-123.379, 48.418], //long, lat
+                    zoom: 14
+                });
+
+                map.on("click", addStop);
+
+                routeTask = new RouteTask("https://route.arcgis.com/arcgis/rest/services/World/Route/NAServer/Route_World");
+                routeParams = new RouteParameters();
+                routeParams.stops = new FeatureSet();
+                routeParams.outSpatialReference = { "wkid": 102100 };
+
+                routeParams = new RouteParameters();
+                routeParams.stops = new FeatureSet();
+                routeParams.outSpatialReference = { "wkid": 4326 };
+
+                routeTask.on("solve-complete", showRoute);
+                routeTask.on("error", errorHandler);
+
+                stopSymbol = new SimpleMarkerSymbol().setStyle(
+                    SimpleMarkerSymbol.STYLE_CROSS);
+                stopSymbol.setSize(15);
+                stopSymbol.outline.setWidth(4);
+                routeSymbol = new SimpleLineSymbol();
+                routeSymbol.setColor(
+                    new Color([0, 0, 255, 0.5]));
+                routeSymbol.setWidth(5);
+
+                function addStop(evt) {
+                    var stop = map.graphics.add(new Graphic(evt.mapPoint, stopSymbol));
+                    routeParams.stops.features.push(stop);
+
+                    if (routeParams.stops.features.length >= 2) {
+                        routeTask.solve(routeParams);
+                        lastStop = routeParams.stops.features.splice(0, 1)[0];
+                    }
+                }
+
+                function showRoute(solveResult) {
+                    map.graphics.add(solveResult.result.routeResults[0].route.setSymbol(routeSymbol));
+                }
+                function errorHandler(err) {
+                    alert("An error occured\n" +
+                        err.message + "\n" +
+                        err.details.join("\n"));
+                    routeParams.stops.features.splice(0, 0, lastStop);
+                }
+            });
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+</html>

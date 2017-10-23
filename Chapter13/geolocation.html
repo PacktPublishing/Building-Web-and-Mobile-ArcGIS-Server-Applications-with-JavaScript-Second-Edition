@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>Geolocation</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+        var map;
+
+        require([
+            "dojo/on",
+            "esri/map",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/graphic",
+            "esri/geometry/Point",
+            "esri/geometry/webMercatorUtils",
+            "dojo/_base/Color",
+            "dojo/domReady!"
+        ], function (on, Map, SimpleMarkerSymbol, Graphic, Point, webMercatorUtils, Color) {
+            map = new Map("map", {
+                basemap: "streets",
+                center: [-117.148, 32.706],
+                zoom: 12
+            });
+            on(map, "load", function () {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(zoomToLocation, locationError);
+                }
+            })
+
+            function zoomToLocation(location) {
+                var symbol = new SimpleMarkerSymbol();
+
+                symbol.setStyle(SimpleMarkerSymbol.STYLE_SQUARE);
+                symbol.setColor(new dojo.Color([153, 0, 51, 0.75]));
+
+                var pt = webMercatorUtils.geographicToWebMercator(new Point(location.coords.longitude, location.coords.latitude));
+                var graphic = new Graphic(pt, symbol);
+                map.graphics.add(graphic);
+                map.centerAndZoom(pt, 16);
+            }
+
+            function locationError(error) {
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        alert("Location not provided");
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        alert("Current location not available");
+                        break;
+                    case error.TIMEOUT:
+                        alert("Timeout");
+                        break;
+                    default:
+                        alert("unknown error");
+                        break;
+                }
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+</html>

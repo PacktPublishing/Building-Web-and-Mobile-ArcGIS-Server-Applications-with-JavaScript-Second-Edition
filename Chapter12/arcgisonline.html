@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>ArcGIS Online Map</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+        require([
+            "dojo/parser",
+            "dojo/ready",
+            "dojo/dom",
+            "esri/map",
+            "esri/arcgis/utils",
+            "esri/dijit/Scalebar",
+            "dojo/domReady!"
+        ], function (parser, ready, dom, Map, arcgisUtils, Scalebar) {
+
+            var agoId = "2d6fa24b357d427f9c737774e7b0f977";
+            var itemDeferred = arcgisUtils.getItem(agoId);
+
+            itemDeferred.addCallback(function (itemInfo) {
+                var mapDeferred = arcgisUtils.createMap(itemInfo, "map", {
+                    mapOptions: {
+                        slider: true,
+                        nav: true
+                    }
+                });
+                mapDeferred.addCallback(function (response) {
+                    map = response.map;
+                });
+                mapDeferred.addErrback(function (error) {
+                    console.log("Map creation failed: ", error);
+                });
+
+            });
+            itemDeferred.addErrback(function (error) {
+                console.log("getItem failed: ", error);
+            });
+
+        });
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+</html>

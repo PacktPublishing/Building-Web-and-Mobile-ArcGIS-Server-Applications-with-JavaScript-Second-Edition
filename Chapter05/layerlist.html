@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Layer List</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html, body, .container, #map {
+            height:100%;
+            width:100%;
+            margin:0;
+            padding:0;
+            margin:0;
+            font-family: "Open Sans";
+        }
+        #map {
+            padding:0;
+        }
+        #layerListPane{
+            width:25%;
+        }
+        <!--.esriLayer{
+          background-color: #fff;
+        }
+        .esriLayerList .esriList{
+            border-top:none;
+        }
+        .esriLayerList .esriTitle {
+          background-color: #fff;
+          border-bottom:none;
+        }
+        .esriLayerList .esriList ul{
+          background-color: #fff;
+        }-->
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/dijit/themes/claro/claro.css">
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+      var map;
+      var hazards;
+
+      require(["esri/map", 
+               "esri/layers/ArcGISDynamicMapServiceLayer",
+               "esri/layers/ArcGISTiledMapServiceLayer",
+               "esri/dijit/LayerList",
+               "dojo/parser",
+               "dojo/domReady!"],
+        function(Map, ArcGISDynamicMapServiceLayer, ArcGISTiledMapServiceLayer, LayerList, parser) {
+        
+        parser.parse();
+        
+        map = new Map("map", {
+            basemap: "topo",
+            center: [-85.700, 38.240], // longitude, latitude
+            zoom: 13
+        });
+        //var topobase = new ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer");
+        var hazards = new ArcGISDynamicMapServiceLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer");      
+        //map.addLayers([topobase, hazards]);
+        map.addLayer(hazards);
+        
+        var layerList = new LayerList({
+            map: map,
+            layers: [{
+                layer: hazards,
+                id: "Hazards",
+                showSubLayers: true
+            }],
+            showOpacitySlider: true           
+        },"layerList");
+        layerList.startup();
+      });
+
+    </script>
+  </head>
+
+    <body class="claro">
+        <div class="container" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design:'headline',gutters:false">
+            <div id="layerListPane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'right'">
+                <div id="layerList"></div>
+            </div>
+            <div id="map" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'"></div>
+        </div>
+    </body>
+</html>

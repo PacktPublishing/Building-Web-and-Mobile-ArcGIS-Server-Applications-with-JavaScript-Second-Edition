@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Graphics</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+      html, body, #map {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+      var map, defPopSymbol, onePopSymbol, twoPopSymbol, threePopSymbol, fourPopSymbol, fivePopSymbol; 
+      require(["esri/map", "esri/tasks/query", "esri/tasks/QueryTask", "esri/symbols/SimpleFillSymbol",
+          "esri/InfoTemplate", "dojo/_base/Color", "dojo/domReady!"],  
+          function(Map, Query, QueryTask, SimpleFillSymbol, InfoTemplate, Color) {
+            map = new Map("map", { 
+            basemap: "streets", 
+            center: [-105.498,38.981], // long, lat 
+            zoom: 6, 
+            sliderStyle: "small" 
+          });     
+          //defPopSymbol = new SimpleFillSymbol().setColor(new Color([255,255,255, 0])); //transparent 
+          onePopSymbol = new SimpleFillSymbol().setColor(new Color([255,255,128, .85])); //yellow 
+          twoPopSymbol = new SimpleFillSymbol().setColor(new Color([250,209,85, .85]));  
+          threePopSymbol = new SimpleFillSymbol().setColor(new Color([242,167,46, .85])); //orange 
+          fourPopSymbol = new SimpleFillSymbol().setColor(new Color([173,83,19, .85]));  
+          fivePopSymbol = new SimpleFillSymbol().setColor(new Color([107,0,0, .85])); //dark maroon    
+
+          var queryTask = new QueryTask("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StateCityHighway_USA/MapServer/2");    
+          var query = new Query(); 
+          var query = new Query(); 
+          query.where = "STATE_NAME = 'Colorado'"; 
+          query.returnGeometry = true; 
+          query.outFields = ["NAME","POP90_SQMI","HOUSEHOLDS","MALES","FEMALES","WHITE","BLACK","HISPANIC"];
+          queryTask.execute(query, addPolysToMap); 
+          resultTemplate = InfoTemplate("County Attributes", "${*}"); 
+          
+          function addPolysToMap(featureSet) { 
+            var features = featureSet.features; 
+            var feature; 
+            for (var i=0, il=features.length; i<il; i++) { 
+              feature = features[i]; 
+              attributes = feature.attributes; 
+              pop = attributes.POP90_SQMI; 
+                              
+              if (pop < 10) { 
+                map.graphics.add(features[i].setSymbol(onePopSymbol)); 
+                } else if (pop >= 10 && pop < 95) { 
+                    map.graphics.add(features[i].setSymbol(twoPopSymbol)); 
+                } else if (pop >= 95 && pop < 365) { 
+                    map.graphics.add(features[i].setSymbol(threePopSymbol)); 
+                } else if (pop >= 365 && pop < 1100) { 
+                    map.graphics.add(features[i].setSymbol(fourPopSymbol)); 
+                } else { 
+                    map.graphics.add(features[i].setSymbol(fivePopSymbol)); 
+                } 
+             } 
+             map.graphics.setInfoTemplate(resultTemplate); 
+          } 
+        }); 
+    </script>
+  </head>
+
+  <body>
+    <div id="map"></div>
+  </body>
+</html>

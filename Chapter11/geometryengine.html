@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>Geometry Engine</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+        var map;
+
+        require(["esri/map",
+            "esri/Color",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/symbols/SimpleFillSymbol",
+            "esri/symbols/SimpleLineSymbol",
+            "esri/graphic",
+            "esri/geometry/geometryEngine",
+            "dojo/on", "dojo/domReady!"],
+            function (Map, Color, SimpleMarkerSymbol, SimpleFillSymbol,
+                SimpleLineSymbol, Graphic, geometryEngine, on) {
+                map = new Map("map", {
+                    basemap: "topo",
+                    center: [0, 0],
+                    zoom: 2
+                });
+
+                var line = new SimpleLineSymbol();
+                line.setWidth(2);
+
+                var marker = new SimpleMarkerSymbol();
+                marker.setColor(new Color([0, 197, 255, 1]));
+                marker.setOutline(line);
+                marker.setSize(12);
+
+                var fill = new SimpleFillSymbol();
+                fill.setColor(new Color([255, 0, 0, 0.50]));
+                fill.setOutline(line);
+
+
+                on(map, 'mouse-move', function (evt) {
+                    map.graphics.clear();
+                    var ptGraphic = new Graphic(evt.mapPoint, marker);
+                    map.graphics.add(ptGraphic);
+
+                    var bufferPoly = geometryEngine.geodesicBuffer(ptGraphic.geometry, 500, "miles");
+                    var bufferGraphic = new Graphic(bufferPoly, fill);
+                    map.graphics.add(bufferGraphic);
+
+                });
+            });
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+</html>

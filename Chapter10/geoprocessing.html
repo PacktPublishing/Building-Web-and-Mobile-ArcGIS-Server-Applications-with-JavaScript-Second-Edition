@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>Geoprocessing</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+        var map, gp;
+
+        require(["esri/map",
+            "esri/config",
+            "esri/geometry/webMercatorUtils",
+            "esri/tasks/Geoprocessor",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/symbols/SimpleLineSymbol",
+            "esri/Color",
+            "esri/tasks/FeatureSet",
+            "dojo/_base/array",
+            "dojo/domReady!"], function (Map, esriConfig, webMercatorUtils, Geoprocessor, SimpleMarkerSymbol, SimpleLineSymbol, Color, FeatureSet, array) {
+
+
+                //esriConfig.defaults.io.proxyUrl = "/proxy/";
+                //esriConfig.defaults.io.alwaysUseProxy = false;
+
+                map = new Map("map", {
+                    basemap: "satellite",
+                    center: [-43.682, 32.99],
+                    zoom: 3
+                });
+
+                map.on("click", executeGPTask);
+
+                //setup the geoprocessor task
+                gp = new Geoprocessor("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_Currents_World/GPServer/MessageInABottle");
+                gp.setOutSpatialReference({ wkid: 102100 });
+
+
+                function executeGPTask(evt) {
+                    map.graphics.clear();
+
+                    var ptSymbol = new SimpleMarkerSymbol()
+                    ptSymbol.setStyle(SimpleMarkerSymbol.STYLE_SQUARE);
+                    ptSymbol.setColor(new Color([255, 255, 255, 1.0]));
+                    ptSymbol.setSize(15);
+
+                    var graphic = new esri.Graphic(evt.mapPoint, ptSymbol);
+                    map.graphics.add(graphic);
+
+                    var features = [];
+                    features.push(graphic);
+                    var featureSet = new FeatureSet();
+                    featureSet.features = features;
+
+                    var params = { "Input_Point": featureSet, "Days": 180 };
+                    gp.execute(params, displayResults, showError);
+                }
+
+                function displayResults(results, messages) {
+
+                    var feature = results[0].value.features[0];
+
+                    var lineSymbol = new SimpleLineSymbol();
+                    lineSymbol.setColor(
+                        new Color([255, 0, 0]));
+                    lineSymbol.setWidth(5);
+
+
+                    feature.setSymbol(lineSymbol);
+
+                    map.graphics.add(feature);
+                }
+
+                function showError(err) {
+                    console.log(err);
+                }
+
+            });
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+</html>
