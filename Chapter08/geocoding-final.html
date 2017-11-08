@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Geocoding</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        #map {
+            height: 90%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+        var map, locator;
+
+        require([
+            "esri/map",
+            "esri/tasks/locator",
+            "esri/graphic",
+            "esri/symbols/SimpleLineSymbol",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/Color",
+            "esri/geometry/Point",
+            "esri/geometry/webMercatorUtils",
+            "dojo/parser",
+            "dojo/dom",
+            "dijit/registry",
+            "dijit/form/Button",
+            "dijit/form/Textarea",
+            "dojo/domReady!"
+        ], function (
+            Map, Locator, Graphic, SimpleLineSymbol,
+            SimpleMarkerSymbol, Color, Point,
+            webMercatorUtils, parser, dom, registry
+        ) {
+                parser.parse();
+
+                map = new Map("map", {
+                    basemap: "topo",
+                    center: [-96.311, 43.676],
+                    zoom: 3
+                });
+
+                locator = new Locator("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer");
+
+                registry.byId("locate").on("click", locate);
+
+                function locate() {
+                    var address = {
+                        SingleLine: dom.byId("address").value
+                    };
+                    var options = {
+                        address: address,
+                        outFields: ["*"]
+                    };
+                    locator.addressToLocations(options);
+                }
+
+                locator.on("address-to-locations-complete", function (evt) {
+                    map.graphics.clear();
+                    var topMatch = evt.addresses[0];
+                    var symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 20,
+                        new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                            new Color([0, 0, 0]), 2),
+                        new Color([255, 0, 0, 0.6]));
+                    var point = webMercatorUtils.geographicToWebMercator(topMatch.location);
+                    var locationGraphic = new Graphic(point, symbol);
+                    map.graphics.add(locationGraphic);
+                    map.centerAndZoom(locationGraphic.geometry, 18);
+                });
+            });
+    </script>
+</head>
+
+<body class="claro">
+    <div id="searchBox">
+        <div>Address :
+            <input type="text" id="address" size="60" value="380 New York St, Redlands, CA, 92373" />
+            <button id="locate" data-dojo-type="dijit/form/Button">Locate</button>
+        </div>
+    </div>
+    <div id="map"></div>
+</body>
+
+</html>

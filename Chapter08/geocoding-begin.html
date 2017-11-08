@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Geocoding</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        #map {
+            height: 90%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+        var map;
+
+        require([
+            "esri/map",
+            "esri/tasks/locator",
+            "esri/graphic",
+            "esri/symbols/SimpleLineSymbol",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/Color",
+            "esri/geometry/Point",
+            "esri/geometry/webMercatorUtils",
+            "dojo/parser",
+            "dojo/dom",
+            "dijit/registry",
+            "dijit/form/Button",
+            "dijit/form/Textarea",
+            "dojo/domReady!"
+        ], function (
+            Map, Locator, Graphic, SimpleLineSymbol,
+            SimpleMarkerSymbol, Color, Point,
+            webMercatorUtils, parser, dom, registry
+        ) {
+                parser.parse();
+
+                map = new Map("map", {
+                    basemap: "topo",
+                    center: [-96.311, 43.676],
+                    zoom: 3
+                });
+
+            });
+    </script>
+</head>
+
+<body class="claro">
+    <div id="searchBox">
+        <div>Address :
+            <input type="text" id="address" size="60" value="380 New York St, Redlands, CA, 92373" />
+            <button id="locate" data-dojo-type="dijit/form/Button">Locate</button>
+        </div>
+    </div>
+    <div id="map"></div>
+</body>
+
+</html>

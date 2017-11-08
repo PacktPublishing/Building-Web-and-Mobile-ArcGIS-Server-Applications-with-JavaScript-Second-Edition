@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>Feature Layer</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+    <style>
+        html,
+        body,
+        #map {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <script src="https://js.arcgis.com/3.21/"></script>
+    <script>
+        var map;
+        require(["esri/map",
+            "esri/layers/FeatureLayer",
+            "esri/symbols/SimpleFillSymbol",
+            "esri/symbols/SimpleLineSymbol",
+            "esri/renderers/SimpleRenderer",
+            "esri/InfoTemplate",
+            "esri/graphic",
+            "dojo/on",
+            "dojo/_base/Color",
+            "dojo/domReady!"],
+            function (Map, FeatureLayer, SimpleFillSymbol, SimpleLineSymbol, SimpleRenderer, InfoTemplate, Graphic, on, Color) {
+
+                map = new Map("map", {
+                    basemap: "streets",
+                    center: [-96.095, 39.726], // long, lat
+                    zoom: 4,
+                    sliderStyle: "small"
+                });
+
+                map.on("load", function () {
+                    map.graphics.on("mouse-out", function (evt) {
+                        map.graphics.clear();
+                        map.infoWindow.hide();
+                    }
+                    );
+                });
+
+                var olderStates = new FeatureLayer("http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Demographics/ESRI_Census_USA/MapServer/5", {
+                    mode: FeatureLayer.MODE_SNAPSHOT,
+                    outFields: ["STATE_NAME", "MED_AGE", "MED_AGE_M", "MED_AGE_F"]
+                });
+                olderStates.setDefinitionExpression("MED_AGE > 36");
+
+                var symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                    new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                        new Color([255, 255, 255, 0.35]), 1),
+                    new Color([125, 125, 125, 0.35]));
+                olderStates.setRenderer(new SimpleRenderer(symbol));
+                map.addLayer(olderStates);
+
+                var infoTemplate = new InfoTemplate();
+                infoTemplate.setTitle("${STATE_NAME}");
+                infoTemplate.setContent("<b>Median Age: </b>${MED_AGE_M}<br/>"
+                    + "<b>Median Age - Male: </b>${MED_AGE_M}<br/>"
+                    + "<b>Median Age - Female: </b>${MED_AGE_F}");
+                map.infoWindow.resize(245, 125);
+
+                var highlightSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                    new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                        new Color([255, 0, 0]),
+                        new Color([125, 125, 125, 0.35])
+                    )
+                );
+
+                olderStates.on("mouse-over", function (evt) {
+                    map.graphics.clear();
+                    evt.graphic.setInfoTemplate(infoTemplate);
+                    var content = evt.graphic.getContent();
+                    map.infoWindow.setContent(content);
+                    var title = evt.graphic.getTitle();
+                    map.infoWindow.setTitle(title);
+                    var highlightGraphic = new Graphic(evt.graphic.geometry, highlightSymbol);
+                    map.graphics.add(highlightGraphic);
+                    map.infoWindow.show(evt.screenPoint, map.getInfoWindowAnchor(evt.screenPoint));
+                });
+            }
+        );
+    </script>
+</head>
+
+<body>
+    <div id="map"></div>
+</body>
+
+</html>
