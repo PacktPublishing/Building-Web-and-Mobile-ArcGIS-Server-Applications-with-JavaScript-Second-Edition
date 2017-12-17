@@ -30,6 +30,3 @@ To complete the activities in this book, you will need access to a web browser--
 * [Mastering ArcGIS Server Development with JavaScript](https://www.packtpub.com/application-development/mastering-arcgis-server-development-javascript?utm_source=github&utm_medium=repository&utm_campaign=9781784396459)
 
 * [Building Web Applications with ArcGIS](https://www.packtpub.com/application-development/building-web-applications-arcgis?utm_source=github&utm_medium=repository&utm_campaign=9781783552955)
-
-### Suggestions and Feedback
-[Click here](https://docs.google.com/forms/d/e/1FAIpQLSe5qwunkGf6PUvzPirPDtuy1Du5Rlzew23UBp2S-P3wB-GcwQ/viewform) if you have any feedback or suggestions.
