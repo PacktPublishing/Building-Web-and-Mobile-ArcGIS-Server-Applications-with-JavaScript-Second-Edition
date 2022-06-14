@@ -1,7 +1,3 @@
-## [Get this title for $10 on Packt's Spring Sale](https://www.packt.com/B06484?utm_source=github&utm_medium=packt-github-repo&utm_campaign=spring_10_dollar_2022)
------
-For a limited period, all eBooks and Videos are only $10. All the practical content you need \- by developers, for developers
-
 # Building Web and Mobile ArcGIS Server Applications with JavaScript - Second Edition
 This is the code repository for [Building Web and Mobile ArcGIS Server Applications with JavaScript - Second Edition](https://www.packtpub.com/application-development/building-web-and-mobile-arcgis-server-applications-javascript-second-edition?utm_source=github&utm_medium=repository&utm_campaign=9781787280526), published by [Packt](https://www.packtpub.com/?utm_source=github). It contains all the supporting project files necessary to work through the book from start to finish.
 ## About the Book
